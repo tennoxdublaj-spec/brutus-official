@@ -272,8 +272,8 @@
         <button class="cat-btn">Isekai</button>
         <button class="cat-btn">Seinen</button>
       </div>
-      <div class="manga-grid">
-        <!-- Manga kartları buraya eklenecek -->
+      <div class="manga-grid" id="mangaGrid">
+        <p style="color:var(--muted);font-size:0.9rem;padding:1rem 0;">Henüz manga eklenmedi. Admin panelinden ekleyebilirsin.</p>
       </div>
     </div>
     <!-- SIDEBAR -->
@@ -366,6 +366,7 @@
     <div class="admin-tabs">
       <div class="admin-tab active" onclick="switchTab('logs')">📋 Kayıt Logları</div>
       <div class="admin-tab" onclick="switchTab('users')">👥 Kullanıcılar</div>
+      <div class="admin-tab" onclick="switchTab('manga')">📚 Manga Yönetimi</div>
     </div>
 
     <!-- LOG TAB -->
@@ -402,6 +403,71 @@
         </table>
       </div>
     </div>
+
+    <!-- MANGA TAB -->
+    <div class="tab-content" id="tab-manga">
+      <!-- Manga Ekle Formu -->
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:1.5rem;margin-bottom:1.5rem;">
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:1.4rem;letter-spacing:0.08em;color:#fff;margin-bottom:1.2rem;">➕ Yeni Manga Ekle</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:1rem;margin-bottom:1rem;">
+          <div>
+            <div style="font-size:0.75rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--muted);margin-bottom:0.4rem;">Manga Adı *</div>
+            <input class="admin-search" id="mTitle" type="text" placeholder="örn: One Piece" style="width:100%;" />
+          </div>
+          <div>
+            <div style="font-size:0.75rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--muted);margin-bottom:0.4rem;">Tür</div>
+            <select id="mGenre" style="background:var(--card);border:1px solid var(--border);color:var(--text);font-family:'Rajdhani',sans-serif;font-size:0.9rem;padding:0.5rem 0.9rem;border-radius:4px;outline:none;width:100%;transition:border-color 0.18s;">
+              <option value="Shounen">Shounen</option>
+              <option value="Seinen">Seinen</option>
+              <option value="Aksiyon">Aksiyon</option>
+              <option value="Fantezi">Fantezi</option>
+              <option value="Romance">Romance</option>
+              <option value="Korku">Korku</option>
+              <option value="Isekai">Isekai</option>
+              <option value="Dövüş">Dövüş</option>
+            </select>
+          </div>
+          <div>
+            <div style="font-size:0.75rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--muted);margin-bottom:0.4rem;">Bölüm Sayısı</div>
+            <input class="admin-search" id="mChap" type="number" placeholder="örn: 120" style="width:100%;" />
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:1rem;margin-bottom:1rem;">
+          <div>
+            <div style="font-size:0.75rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--muted);margin-bottom:0.4rem;">Durum</div>
+            <select id="mStatus" style="background:var(--card);border:1px solid var(--border);color:var(--text);font-family:'Rajdhani',sans-serif;font-size:0.9rem;padding:0.5rem 0.9rem;border-radius:4px;outline:none;width:100%;transition:border-color 0.18s;">
+              <option value="hot">🔥 Trend</option>
+              <option value="new">🆕 Yeni</option>
+              <option value="done">✅ Bitti</option>
+            </select>
+          </div>
+          <div>
+            <div style="font-size:0.75rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--muted);margin-bottom:0.4rem;">Emoji / İkon</div>
+            <input class="admin-search" id="mEmoji" type="text" placeholder="örn: ⚔️" style="width:100%;" />
+          </div>
+          <div>
+            <div style="font-size:0.75rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--muted);margin-bottom:0.4rem;">Kapak Rengi (HEX)</div>
+            <input class="admin-search" id="mColor" type="text" placeholder="örn: #1a0a1a" style="width:100%;" value="#1a0a1a" />
+          </div>
+        </div>
+        <div style="margin-bottom:1rem;">
+          <div style="font-size:0.75rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--muted);margin-bottom:0.4rem;">Kapak Görseli URL (İsteğe bağlı)</div>
+          <input class="admin-search" id="mImg" type="text" placeholder="https://... (boş bırakırsan emoji gösterilir)" style="width:100%;" />
+        </div>
+        <button onclick="addManga()" style="background:var(--accent);color:#fff;border:none;padding:0.65rem 2rem;font-family:'Bebas Neue',sans-serif;font-size:1rem;letter-spacing:0.1em;border-radius:4px;cursor:pointer;transition:background 0.18s;">➕ MANGA EKLE</button>
+      </div>
+
+      <!-- Manga Listesi -->
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:1.2rem;letter-spacing:0.08em;color:#fff;">📋 Mevcut Mangalar <span id="mangaCount" style="color:var(--muted);font-size:0.9rem;"></span></div>
+      </div>
+      <div class="admin-table-wrap">
+        <table class="admin-table">
+          <thead><tr><th>#</th><th>Kapak</th><th>Manga Adı</th><th>Tür</th><th>Bölüm</th><th>Durum</th><th>İşlem</th></tr></thead>
+          <tbody id="mangaTable"></tbody>
+        </table>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -416,6 +482,7 @@ const ADMIN = { username: 'Brütüs Offical', password: 'Brutus@2026!', role: 'a
 
 let users = [ADMIN];
 let logs = [];
+let mangas = [];
 let currentUser = null;
 let logFilter = 'all';
 
@@ -567,11 +634,12 @@ function updateAdminTime() {
 
 // TABS
 function switchTab(name) {
-  document.querySelectorAll('.admin-tab').forEach((t, i) => t.classList.toggle('active', ['logs','users'][i] === name));
+  document.querySelectorAll('.admin-tab').forEach((t, i) => t.classList.toggle('active', ['logs','users','manga'][i] === name));
   document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
   document.getElementById('tab-' + name).classList.add('active');
   if (name === 'logs') renderLogs();
   if (name === 'users') renderUsers();
+  if (name === 'manga') renderMangaTable();
 }
 
 // LOGS RENDER
@@ -645,7 +713,101 @@ function toggleBan(username) {
 }
 
 // ═══════════════════════════════════════════════
-// TOAST
+// MANGA YÖNETİMİ
+// ═══════════════════════════════════════════════
+const BADGE_COLORS = { hot: '#e8002e', new: '#ff6b00', done: '#2a7a3a' };
+const BADGE_LABELS = { hot: 'Trend', new: 'Yeni', done: 'Bitti' };
+
+function addManga() {
+  const title = document.getElementById('mTitle').value.trim();
+  const genre = document.getElementById('mGenre').value;
+  const chap  = document.getElementById('mChap').value.trim();
+  const status= document.getElementById('mStatus').value;
+  const emoji = document.getElementById('mEmoji').value.trim() || '📖';
+  const color = document.getElementById('mColor').value.trim() || '#1a0a1a';
+  const img   = document.getElementById('mImg').value.trim();
+
+  if (!title) { showToast('Manga adı boş olamaz!', 'error'); return; }
+
+  const manga = {
+    id: Date.now(),
+    title, genre,
+    chap: chap ? parseInt(chap) : '?',
+    status, emoji, color, img
+  };
+  mangas.push(manga);
+  addLog('admin', currentUser.username, `Manga eklendi: ${title}`);
+  renderMangaTable();
+  renderMangaGrid();
+  showToast(`"${title}" eklendi! 📚`, 'success');
+
+  // Formu temizle
+  document.getElementById('mTitle').value = '';
+  document.getElementById('mChap').value = '';
+  document.getElementById('mEmoji').value = '';
+  document.getElementById('mImg').value = '';
+  document.getElementById('mColor').value = '#1a0a1a';
+}
+
+function deleteManga(id) {
+  const m = mangas.find(x => x.id === id);
+  if (!m) return;
+  if (!confirm(`"${m.title}" silinsin mi?`)) return;
+  mangas = mangas.filter(x => x.id !== id);
+  addLog('admin', currentUser.username, `Manga silindi: ${m.title}`);
+  renderMangaTable();
+  renderMangaGrid();
+  showToast(`"${m.title}" silindi.`, 'info');
+}
+
+function renderMangaTable() {
+  const tbody = document.getElementById('mangaTable');
+  document.getElementById('mangaCount').textContent = `(${mangas.length} manga)`;
+  if (mangas.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:2rem;">Henüz manga eklenmedi</td></tr>';
+    return;
+  }
+  tbody.innerHTML = mangas.map((m, i) => `
+    <tr>
+      <td style="color:var(--muted);font-size:0.8rem;">${i+1}</td>
+      <td>
+        <div style="width:36px;height:50px;border-radius:3px;background:linear-gradient(135deg,${m.color},#0a0a0a);display:flex;align-items:center;justify-content:center;font-size:1.2rem;overflow:hidden;">
+          ${m.img ? `<img src="${m.img}" style="width:100%;height:100%;object-fit:cover;" onerror="this.style.display='none';this.parentNode.innerHTML='${m.emoji}'">` : m.emoji}
+        </div>
+      </td>
+      <td style="font-weight:700;">${m.title}</td>
+      <td style="color:var(--muted);font-size:0.85rem;">${m.genre}</td>
+      <td style="color:var(--accent);font-weight:600;">Böl. ${m.chap}</td>
+      <td><span style="background:${BADGE_COLORS[m.status]}22;color:${BADGE_COLORS[m.status]};border:1px solid ${BADGE_COLORS[m.status]}55;padding:0.2rem 0.6rem;border-radius:3px;font-size:0.7rem;font-weight:700;text-transform:uppercase;">${BADGE_LABELS[m.status]}</span></td>
+      <td><button class="admin-action-btn btn-ban" onclick="deleteManga(${m.id})">🗑 Sil</button></td>
+    </tr>
+  `).join('');
+}
+
+function renderMangaGrid() {
+  const grid = document.getElementById('mangaGrid');
+  if (!grid) return;
+  if (mangas.length === 0) {
+    grid.innerHTML = '<p style="color:var(--muted);font-size:0.9rem;padding:1rem 0;">Henüz manga eklenmedi. Admin panelinden ekleyebilirsin.</p>';
+    return;
+  }
+  grid.innerHTML = mangas.map(m => `
+    <div class="manga-card">
+      <div class="manga-thumb" style="background:linear-gradient(135deg,${m.color},#0a0a0a);">
+        ${m.img
+          ? `<img src="${m.img}" style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0;" onerror="this.style.display='none'">`
+          : m.emoji}
+        <span class="manga-badge badge-${m.status}">${BADGE_LABELS[m.status]}</span>
+      </div>
+      <div class="manga-info">
+        <div class="manga-title">${m.title}</div>
+        <div class="manga-meta"><span class="manga-chap">Böl. ${m.chap}</span><span>${m.genre}</span></div>
+      </div>
+    </div>
+  `).join('');
+}
+
+// ═══════════════════════════════════════════════
 // ═══════════════════════════════════════════════
 let toastTimer;
 function showToast(msg, type='info') {
@@ -671,6 +833,7 @@ document.querySelectorAll('.cat-btn').forEach(btn => {
 // ═══════════════════════════════════════════════
 addLog('admin', 'Brütüs Offical', 'Sistem başlatıldı');
 addLog('login', 'Brütüs Offical', 'Otomatik sistem girişi');
+renderMangaGrid();
 </script>
 </body>
 </html>
