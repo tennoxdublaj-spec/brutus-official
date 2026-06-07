@@ -1,0 +1,704 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Brütüs Official – Manga Okuma Sitesi</title>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Rajdhani:wght@400;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #0a0a0f; --surface: #111118; --card: #16161f; --border: #2a2a3a;
+      --accent: #e8002e; --accent2: #ff6b00; --gold: #f5c518;
+      --text: #e8e8f0; --muted: #6a6a82; --white: #ffffff;
+      --green: #00c853; --red: #e8002e; --blue: #0077ff;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body { background: var(--bg); color: var(--text); font-family: 'Rajdhani', sans-serif; overflow-x: hidden; }
+
+    /* ── NOISE ── */
+    body::before {
+      content: ''; position: fixed; inset: 0; pointer-events: none; z-index: 9999; opacity: 0.25;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+    }
+
+    /* ── NAVBAR ── */
+    nav {
+      position: sticky; top: 0; z-index: 200;
+      background: rgba(10,10,15,0.95); backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 2rem; height: 60px;
+    }
+    .nav-logo {
+      font-family: 'Bebas Neue', sans-serif; font-size: 1.7rem;
+      letter-spacing: 0.12em; color: var(--white); text-decoration: none;
+    }
+    .nav-logo span { color: var(--accent); }
+    .nav-logo::before { content: '⚔ '; color: var(--accent); }
+    .nav-links { display: flex; gap: 1.8rem; list-style: none; }
+    .nav-links a { color: var(--muted); text-decoration: none; font-weight: 600; font-size: 0.9rem; letter-spacing: 0.06em; text-transform: uppercase; transition: color 0.2s; }
+    .nav-links a:hover { color: var(--accent); }
+    .nav-right { display: flex; gap: 0.6rem; align-items: center; }
+    .btn-sm { padding: 0.4rem 1rem; border-radius: 4px; font-family: 'Rajdhani', sans-serif; font-weight: 700; font-size: 0.85rem; letter-spacing: 0.08em; cursor: pointer; text-transform: uppercase; border: none; transition: all 0.2s; }
+    .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text); }
+    .btn-outline:hover { border-color: var(--accent); color: var(--accent); }
+    .btn-primary { background: var(--accent); color: var(--white); }
+    .btn-primary:hover { background: #c0001e; }
+    .btn-admin { background: var(--gold); color: #000; }
+    .btn-admin:hover { background: #d4a800; }
+    #userBadge { display:none; align-items:center; gap:0.5rem; color: var(--text); font-weight:600; font-size:0.9rem; }
+    #userBadge .avatar { width:30px; height:30px; border-radius:50%; background:var(--accent); display:flex; align-items:center; justify-content:center; font-size:0.75rem; font-weight:700; color:#fff; }
+    #userBadge .admin-crown { color:var(--gold); font-size:1rem; }
+
+    /* ── TICKER ── */
+    .ticker-wrap { background: var(--accent); overflow: hidden; padding: 0.5rem 0; border-bottom: 1px solid rgba(0,0,0,0.3); }
+    .ticker-track { display: flex; gap: 3rem; animation: ticker 30s linear infinite; white-space: nowrap; }
+    .ticker-item { font-family: 'Bebas Neue', sans-serif; font-size: 0.85rem; letter-spacing: 0.15em; color: rgba(255,255,255,0.9); }
+    .ticker-item strong { color: #fff; }
+    @keyframes ticker { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+
+    /* ── HERO ── */
+    .hero { position: relative; min-height: 85vh; display: flex; align-items: center; overflow: hidden; padding: 4rem 4rem; }
+    .hero-bg { position: absolute; inset: 0; background: radial-gradient(ellipse 60% 80% at 70% 50%, rgba(232,0,46,0.12) 0%, transparent 70%), radial-gradient(ellipse 40% 60% at 20% 80%, rgba(255,107,0,0.07) 0%, transparent 60%); }
+    .hero-grid { position: absolute; inset: 0; background-image: linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px); background-size: 60px 60px; }
+    .hero-content { position: relative; z-index: 2; max-width: 640px; animation: fadeUp 0.7s ease both; }
+    .hero-tag { display: inline-block; background: var(--accent); color: #fff; font-size: 0.7rem; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; padding: 0.3rem 0.85rem; margin-bottom: 1.4rem; clip-path: polygon(0 0, 100% 0, 96% 100%, 0 100%); }
+    .hero h1 { font-family: 'Bebas Neue', sans-serif; font-size: clamp(3rem, 8vw, 6rem); line-height: 0.92; letter-spacing: 0.04em; color: #fff; margin-bottom: 1.2rem; }
+    .hero h1 em { font-style: normal; color: var(--accent); display: block; }
+    .hero p { color: var(--muted); font-size: 1.05rem; line-height: 1.65; margin-bottom: 2rem; max-width: 480px; }
+    .hero-actions { display: flex; gap: 1rem; }
+    .btn-hero { padding: 0.85rem 2.2rem; font-family: 'Bebas Neue', sans-serif; font-size: 1.1rem; letter-spacing: 0.12em; cursor: pointer; border: none; transition: all 0.22s; text-decoration: none; display: inline-block; }
+    .btn-hero-red { background: var(--accent); color: #fff; clip-path: polygon(0 0, 100% 0, 94% 100%, 0 100%); }
+    .btn-hero-red:hover { background: #ff1a40; transform: translateY(-2px); }
+    .btn-hero-ghost { background: transparent; color: var(--text); border: 1px solid var(--border); }
+    .btn-hero-ghost:hover { border-color: var(--accent); color: var(--accent); }
+    .hero-stats { margin-top: 3rem; display: flex; gap: 2.5rem; animation: fadeUp 0.7s 0.2s ease both; }
+    .stat { display: flex; flex-direction: column; }
+    .stat-num { font-family: 'Bebas Neue', sans-serif; font-size: 2rem; color: #fff; }
+    .stat-num span { color: var(--accent); }
+    .stat-label { font-size: 0.72rem; color: var(--muted); letter-spacing: 0.1em; text-transform: uppercase; }
+
+    /* ── MAIN CONTENT ── */
+    .main-wrap { padding: 3rem 2rem; }
+    .section-header { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 1.5rem; }
+    .section-title { font-family: 'Bebas Neue', sans-serif; font-size: 2rem; letter-spacing: 0.08em; color: #fff; display: flex; align-items: center; gap: 0.7rem; }
+    .section-title::before { content: ''; display: inline-block; width: 4px; height: 1.5rem; background: var(--accent); }
+    .see-all { color: var(--accent); font-size: 0.82rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; text-decoration: none; }
+    .two-col { display: grid; grid-template-columns: 1fr 320px; gap: 2rem; }
+
+    /* ── MANGA CARDS ── */
+    .manga-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 1rem; }
+    .manga-card { background: var(--card); border: 1px solid var(--border); border-radius: 4px; overflow: hidden; cursor: pointer; transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s; }
+    .manga-card:hover { transform: translateY(-4px); border-color: var(--accent); box-shadow: 0 8px 32px rgba(232,0,46,0.2); }
+    .manga-thumb { width: 100%; aspect-ratio: 2/3; display: flex; align-items: center; justify-content: center; font-size: 3rem; position: relative; }
+    .manga-badge { position: absolute; top: 0.5rem; left: 0.5rem; color: #fff; font-size: 0.6rem; font-weight: 700; letter-spacing: 0.1em; padding: 0.2rem 0.5rem; text-transform: uppercase; }
+    .badge-hot { background: var(--accent); }
+    .badge-new { background: var(--accent2); }
+    .badge-done { background: #2a7a3a; }
+    .manga-info { padding: 0.65rem 0.75rem; }
+    .manga-title { font-weight: 700; font-size: 0.88rem; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 0.2rem; }
+    .manga-meta { display: flex; justify-content: space-between; font-size: 0.72rem; color: var(--muted); }
+    .manga-chap { color: var(--accent); font-weight: 600; }
+
+    /* ── CATEGORIES ── */
+    .categories { display: flex; gap: 0.6rem; flex-wrap: wrap; margin-bottom: 1.5rem; }
+    .cat-btn { padding: 0.4rem 1rem; background: var(--card); border: 1px solid var(--border); color: var(--muted); font-family: 'Rajdhani', sans-serif; font-weight: 600; font-size: 0.82rem; letter-spacing: 0.08em; text-transform: uppercase; cursor: pointer; border-radius: 2px; transition: all 0.18s; }
+    .cat-btn:hover, .cat-btn.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+
+    /* ── SIDEBAR ── */
+    .ranking-list { display: flex; flex-direction: column; gap: 0.5rem; }
+    .rank-item { display: flex; align-items: center; gap: 0.85rem; background: var(--card); border: 1px solid var(--border); border-radius: 4px; padding: 0.75rem 0.9rem; cursor: pointer; transition: border-color 0.18s; }
+    .rank-item:hover { border-color: var(--accent); }
+    .rank-num { font-family: 'Bebas Neue', sans-serif; font-size: 1.5rem; color: var(--border); width: 1.8rem; text-align: center; flex-shrink: 0; }
+    .rank-num.top { color: var(--accent); }
+    .rank-thumb { width: 40px; height: 54px; border-radius: 2px; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; flex-shrink: 0; }
+    .rank-info { flex: 1; min-width: 0; }
+    .rank-name { font-weight: 700; font-size: 0.88rem; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .rank-sub { font-size: 0.75rem; color: var(--muted); }
+    .rank-score { font-family: 'Bebas Neue', sans-serif; font-size: 1.1rem; color: var(--gold); }
+
+    /* ── MODAL OVERLAY ── */
+    .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.75); z-index: 500; align-items: center; justify-content: center; backdrop-filter: blur(6px); }
+    .modal-overlay.open { display: flex; }
+    .modal { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 2rem; width: 100%; max-width: 420px; position: relative; animation: fadeUp 0.25s ease both; }
+    .modal-close { position: absolute; top: 1rem; right: 1rem; background: none; border: none; color: var(--muted); font-size: 1.3rem; cursor: pointer; }
+    .modal-close:hover { color: var(--text); }
+    .modal-title { font-family: 'Bebas Neue', sans-serif; font-size: 1.8rem; letter-spacing: 0.08em; color: #fff; margin-bottom: 1.5rem; }
+    .modal-title span { color: var(--accent); }
+    .form-group { display: flex; flex-direction: column; gap: 0.4rem; margin-bottom: 1rem; }
+    .form-label { font-size: 0.8rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+    .form-input { background: var(--card); border: 1px solid var(--border); color: var(--text); font-family: 'Rajdhani', sans-serif; font-size: 0.95rem; padding: 0.65rem 0.9rem; border-radius: 4px; outline: none; transition: border-color 0.18s; width: 100%; }
+    .form-input:focus { border-color: var(--accent); }
+    .form-error { font-size: 0.8rem; color: var(--accent); margin-top: -0.5rem; margin-bottom: 0.5rem; display: none; }
+    .form-error.show { display: block; }
+    .form-submit { width: 100%; padding: 0.75rem; background: var(--accent); color: #fff; border: none; font-family: 'Bebas Neue', sans-serif; font-size: 1.1rem; letter-spacing: 0.1em; border-radius: 4px; cursor: pointer; transition: background 0.18s; margin-top: 0.5rem; }
+    .form-submit:hover { background: #c0001e; }
+    .form-switch { text-align: center; margin-top: 1rem; font-size: 0.85rem; color: var(--muted); }
+    .form-switch a { color: var(--accent); cursor: pointer; font-weight: 700; }
+    .modal-success { text-align: center; padding: 1rem 0; }
+    .modal-success .check { font-size: 3rem; margin-bottom: 0.75rem; }
+    .modal-success p { color: var(--muted); font-size: 0.95rem; }
+
+    /* ── ADMIN PANEL ── */
+    #adminPanel { display: none; position: fixed; inset: 0; background: var(--bg); z-index: 600; overflow-y: auto; }
+    .admin-nav { background: rgba(10,10,15,0.98); border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; padding: 0 2rem; height: 60px; position: sticky; top: 0; z-index: 10; }
+    .admin-logo { font-family: 'Bebas Neue', sans-serif; font-size: 1.4rem; letter-spacing: 0.1em; color: #fff; }
+    .admin-logo span { color: var(--gold); }
+    .admin-body { padding: 2rem; }
+    .admin-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 2rem; }
+    .admin-header h1 { font-family: 'Bebas Neue', sans-serif; font-size: 2.5rem; color: #fff; letter-spacing: 0.08em; }
+    .admin-header h1 span { color: var(--gold); }
+
+    /* Admin stats */
+    .admin-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 2rem; }
+    .astat { background: var(--card); border: 1px solid var(--border); border-radius: 6px; padding: 1.2rem 1.5rem; }
+    .astat-label { font-size: 0.72rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-bottom: 0.5rem; }
+    .astat-val { font-family: 'Bebas Neue', sans-serif; font-size: 2rem; color: #fff; }
+    .astat-val.red { color: var(--accent); }
+    .astat-val.gold { color: var(--gold); }
+    .astat-val.green { color: var(--green); }
+    .astat-val.blue { color: var(--blue); }
+
+    /* Tabs */
+    .admin-tabs { display: flex; gap: 0; border-bottom: 1px solid var(--border); margin-bottom: 1.5rem; }
+    .admin-tab { padding: 0.75rem 1.5rem; font-family: 'Bebas Neue', sans-serif; font-size: 1rem; letter-spacing: 0.1em; color: var(--muted); cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.18s; }
+    .admin-tab:hover { color: var(--text); }
+    .admin-tab.active { color: var(--gold); border-bottom-color: var(--gold); }
+
+    /* Tables */
+    .admin-table-wrap { background: var(--card); border: 1px solid var(--border); border-radius: 6px; overflow: hidden; }
+    .admin-table { width: 100%; border-collapse: collapse; font-size: 0.88rem; }
+    .admin-table th { background: var(--surface); color: var(--muted); font-size: 0.72rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; padding: 0.75rem 1rem; text-align: left; border-bottom: 1px solid var(--border); }
+    .admin-table td { padding: 0.75rem 1rem; border-bottom: 1px solid rgba(255,255,255,0.04); color: var(--text); vertical-align: middle; }
+    .admin-table tr:last-child td { border-bottom: none; }
+    .admin-table tr:hover td { background: rgba(255,255,255,0.02); }
+    .log-type { display: inline-block; padding: 0.2rem 0.6rem; border-radius: 3px; font-size: 0.7rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; }
+    .log-register { background: rgba(0,200,83,0.15); color: var(--green); border: 1px solid rgba(0,200,83,0.3); }
+    .log-login { background: rgba(0,119,255,0.15); color: var(--blue); border: 1px solid rgba(0,119,255,0.3); }
+    .log-logout { background: rgba(106,106,130,0.15); color: var(--muted); border: 1px solid var(--border); }
+    .log-fail { background: rgba(232,0,46,0.15); color: var(--accent); border: 1px solid rgba(232,0,46,0.3); }
+    .log-admin { background: rgba(245,197,24,0.15); color: var(--gold); border: 1px solid rgba(245,197,24,0.3); }
+    .user-role { display: inline-block; padding: 0.2rem 0.6rem; border-radius: 3px; font-size: 0.7rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; }
+    .role-admin { background: rgba(245,197,24,0.15); color: var(--gold); border: 1px solid rgba(245,197,24,0.3); }
+    .role-user { background: rgba(106,106,130,0.1); color: var(--muted); border: 1px solid var(--border); }
+    .online-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 0.4rem; }
+    .dot-green { background: var(--green); box-shadow: 0 0 6px var(--green); }
+    .dot-gray { background: var(--muted); }
+    .admin-action-btn { padding: 0.3rem 0.8rem; border-radius: 3px; font-family: 'Rajdhani', sans-serif; font-size: 0.78rem; font-weight: 700; cursor: pointer; border: none; transition: all 0.18s; }
+    .btn-ban { background: rgba(232,0,46,0.15); color: var(--accent); border: 1px solid rgba(232,0,46,0.3); }
+    .btn-ban:hover { background: var(--accent); color: #fff; }
+    .btn-unban { background: rgba(0,200,83,0.15); color: var(--green); border: 1px solid rgba(0,200,83,0.3); }
+    .btn-unban:hover { background: var(--green); color: #000; }
+    .admin-search { background: var(--card); border: 1px solid var(--border); color: var(--text); font-family: 'Rajdhani', sans-serif; font-size: 0.9rem; padding: 0.5rem 0.9rem; border-radius: 4px; outline: none; width: 260px; transition: border-color 0.18s; }
+    .admin-search:focus { border-color: var(--gold); }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+    .log-filters { display: flex; gap: 0.5rem; margin-bottom: 1rem; flex-wrap: wrap; }
+    .log-filter { padding: 0.3rem 0.8rem; background: var(--card); border: 1px solid var(--border); color: var(--muted); font-family: 'Rajdhani', sans-serif; font-size: 0.78rem; font-weight: 700; cursor: pointer; border-radius: 3px; text-transform: uppercase; letter-spacing: 0.06em; transition: all 0.18s; }
+    .log-filter.active { background: var(--gold); border-color: var(--gold); color: #000; }
+
+    /* Toast */
+    .toast { position: fixed; bottom: 1.5rem; right: 1.5rem; background: var(--card); border: 1px solid var(--border); border-radius: 6px; padding: 0.85rem 1.2rem; font-size: 0.9rem; color: var(--text); z-index: 9000; transform: translateX(200%); transition: transform 0.3s ease; max-width: 300px; }
+    .toast.show { transform: translateX(0); }
+    .toast.success { border-color: var(--green); }
+    .toast.error { border-color: var(--accent); }
+    .toast.info { border-color: var(--blue); }
+
+    /* Footer */
+    footer { background: var(--surface); border-top: 1px solid var(--border); padding: 1.5rem 2rem; display: flex; justify-content: space-between; align-items: center; font-size: 0.8rem; color: var(--muted); flex-wrap: wrap; gap: 1rem; }
+    footer span.r { color: var(--accent); }
+    footer a { color: var(--muted); text-decoration: none; }
+    footer a:hover { color: var(--accent); }
+
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+    @media (max-width: 900px) { .two-col { grid-template-columns: 1fr; } .hero { padding: 3rem 1.5rem; } .admin-stats { grid-template-columns: repeat(2,1fr); } }
+    @media (max-width: 600px) { .nav-links { display: none; } .manga-grid { grid-template-columns: repeat(auto-fill, minmax(130px,1fr)); } .admin-stats { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+
+<!-- ═══ NAVBAR ═══ -->
+<nav>
+  <a href="#" class="nav-logo">BRÜTÜS<span> OFFİCİAL</span></a>
+  <ul class="nav-links">
+    <li><a href="#">Ana Sayfa</a></li>
+    <li><a href="#">Manga Listesi</a></li>
+    <li><a href="#">Son Bölümler</a></li>
+    <li><a href="#">En Popüler</a></li>
+  </ul>
+  <div class="nav-right" id="navRight">
+    <button class="btn-sm btn-outline" onclick="openModal('loginModal')">Giriş Yap</button>
+    <button class="btn-sm btn-primary" onclick="openModal('registerModal')">Kayıt Ol</button>
+  </div>
+</nav>
+
+<!-- TICKER -->
+<div class="ticker-wrap">
+  <div class="ticker-track">
+    <span class="ticker-item">⚔ <strong>YENİ BÖLÜM</strong> — Berserk 385</span>
+    <span class="ticker-item">🔥 <strong>TREND</strong> — Solo Leveling 200</span>
+    <span class="ticker-item">⚔ <strong>YENİ BÖLÜM</strong> — One Piece 1115</span>
+    <span class="ticker-item">⭐ <strong>ÖNERİLEN</strong> — Vinland Saga 210</span>
+    <span class="ticker-item">🔥 <strong>TREND</strong> — Jujutsu Kaisen 265</span>
+    <span class="ticker-item">⚔ <strong>YENİ BÖLÜM</strong> — Chainsaw Man 180</span>
+    <span class="ticker-item">⚔ <strong>YENİ BÖLÜM</strong> — Berserk 385</span>
+    <span class="ticker-item">🔥 <strong>TREND</strong> — Solo Leveling 200</span>
+    <span class="ticker-item">⚔ <strong>YENİ BÖLÜM</strong> — One Piece 1115</span>
+    <span class="ticker-item">⭐ <strong>ÖNERİLEN</strong> — Vinland Saga 210</span>
+    <span class="ticker-item">🔥 <strong>TREND</strong> — Jujutsu Kaisen 265</span>
+    <span class="ticker-item">⚔ <strong>YENİ BÖLÜM</strong> — Chainsaw Man 180</span>
+  </div>
+</div>
+
+<!-- ═══ HERO ═══ -->
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-grid"></div>
+  <div class="hero-content">
+    <div class="hero-tag">Türkiye'nin En İyi Manga Platformu</div>
+    <h1>BRÜTÜS<em>OFFİCİAL</em></h1>
+    <p>Binlerce manga, türkçe çeviriler ve haftalık güncellemelerle dolu bir dünyaya hoş geldin. Ücretsiz oku, favorine ekle, topluluğa katıl.</p>
+    <div class="hero-actions">
+      <a href="#" class="btn-hero btn-hero-red">Okumaya Başla</a>
+      <a href="#" class="btn-hero btn-hero-ghost">Tüm Mangalar</a>
+    </div>
+    <div class="hero-stats">
+      <div class="stat"><span class="stat-num">12<span>K+</span></span><span class="stat-label">Manga</span></div>
+      <div class="stat"><span class="stat-num">480<span>K+</span></span><span class="stat-label">Bölüm</span></div>
+      <div class="stat"><span class="stat-num">2<span>M+</span></span><span class="stat-label">Okuyucu</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ MAIN ═══ -->
+<div class="main-wrap">
+  <div class="two-col">
+    <div>
+      <div class="section-header">
+        <h2 class="section-title">Son Eklenenler</h2>
+        <a href="#" class="see-all">Tümü →</a>
+      </div>
+      <div class="categories">
+        <button class="cat-btn active">Tümü</button>
+        <button class="cat-btn">Aksiyon</button>
+        <button class="cat-btn">Fantezi</button>
+        <button class="cat-btn">Romance</button>
+        <button class="cat-btn">Korku</button>
+        <button class="cat-btn">Isekai</button>
+        <button class="cat-btn">Seinen</button>
+      </div>
+      <div class="manga-grid">
+        <div class="manga-card"><div class="manga-thumb" style="background:linear-gradient(135deg,#1a0a1a,#0d0518)">🗡️<span class="manga-badge badge-hot">Trend</span></div><div class="manga-info"><div class="manga-title">Jujutsu Kaisen</div><div class="manga-meta"><span class="manga-chap">Böl. 265</span><span>Shounen</span></div></div></div>
+        <div class="manga-card"><div class="manga-thumb" style="background:linear-gradient(135deg,#0a1a0a,#0d1800)">⚔️<span class="manga-badge badge-new">Yeni</span></div><div class="manga-info"><div class="manga-title">Berserk</div><div class="manga-meta"><span class="manga-chap">Böl. 385</span><span>Seinen</span></div></div></div>
+        <div class="manga-card"><div class="manga-thumb" style="background:linear-gradient(135deg,#1a0a0a,#180d0d)">🔥<span class="manga-badge badge-hot">Trend</span></div><div class="manga-info"><div class="manga-title">Solo Leveling</div><div class="manga-meta"><span class="manga-chap">Böl. 200</span><span>Aksiyon</span></div></div></div>
+        <div class="manga-card"><div class="manga-thumb" style="background:linear-gradient(135deg,#0a0a1a,#0d0d1a)">🌊<span class="manga-badge badge-new">Yeni</span></div><div class="manga-info"><div class="manga-title">One Piece</div><div class="manga-meta"><span class="manga-chap">Böl. 1115</span><span>Shounen</span></div></div></div>
+        <div class="manga-card"><div class="manga-thumb" style="background:linear-gradient(135deg,#180f0a,#1a0e00)">🔞<span class="manga-badge badge-hot">Trend</span></div><div class="manga-info"><div class="manga-title">Chainsaw Man</div><div class="manga-meta"><span class="manga-chap">Böl. 180</span><span>Shounen</span></div></div></div>
+        <div class="manga-card"><div class="manga-thumb" style="background:linear-gradient(135deg,#0f1a0a,#0a1800)">🪖<span class="manga-badge badge-done">Bitti</span></div><div class="manga-info"><div class="manga-title">Vinland Saga</div><div class="manga-meta"><span class="manga-chap">Böl. 210</span><span>Seinen</span></div></div></div>
+        <div class="manga-card"><div class="manga-thumb" style="background:linear-gradient(135deg,#1a1a0a,#181500)">🐉<span class="manga-badge badge-new">Yeni</span></div><div class="manga-info"><div class="manga-title">Mushishi</div><div class="manga-meta"><span class="manga-chap">Böl. 50</span><span>Seinen</span></div></div></div>
+        <div class="manga-card"><div class="manga-thumb" style="background:linear-gradient(135deg,#0a1a1a,#001518)">⛓️<span class="manga-badge badge-done">Bitti</span></div><div class="manga-info"><div class="manga-title">Attack on Titan</div><div class="manga-meta"><span class="manga-chap">Böl. 139</span><span>Shounen</span></div></div></div>
+      </div>
+    </div>
+    <!-- SIDEBAR -->
+    <div>
+      <div class="section-header"><h2 class="section-title">Haftalık Top</h2></div>
+      <div class="ranking-list">
+        <div class="rank-item"><span class="rank-num top">1</span><div class="rank-thumb" style="background:linear-gradient(135deg,#1a0a1a,#0d0518)">🗡️</div><div class="rank-info"><div class="rank-name">Jujutsu Kaisen</div><div class="rank-sub">265 Böl · Shounen</div></div><span class="rank-score">9.8</span></div>
+        <div class="rank-item"><span class="rank-num top">2</span><div class="rank-thumb" style="background:linear-gradient(135deg,#0a1a0a,#0d1800)">⚔️</div><div class="rank-info"><div class="rank-name">Berserk</div><div class="rank-sub">385 Böl · Seinen</div></div><span class="rank-score">9.7</span></div>
+        <div class="rank-item"><span class="rank-num top">3</span><div class="rank-thumb" style="background:linear-gradient(135deg,#0a0a1a,#0d0d1a)">🌊</div><div class="rank-info"><div class="rank-name">One Piece</div><div class="rank-sub">1115 Böl · Shounen</div></div><span class="rank-score">9.6</span></div>
+        <div class="rank-item"><span class="rank-num">4</span><div class="rank-thumb" style="background:linear-gradient(135deg,#1a0a0a,#180d0d)">🔥</div><div class="rank-info"><div class="rank-name">Solo Leveling</div><div class="rank-sub">200 Böl · Aksiyon</div></div><span class="rank-score">9.5</span></div>
+        <div class="rank-item"><span class="rank-num">5</span><div class="rank-thumb" style="background:linear-gradient(135deg,#180f0a,#1a0e00)">🔞</div><div class="rank-info"><div class="rank-name">Chainsaw Man</div><div class="rank-sub">180 Böl · Shounen</div></div><span class="rank-score">9.4</span></div>
+        <div class="rank-item"><span class="rank-num">6</span><div class="rank-thumb" style="background:linear-gradient(135deg,#0f1a0a,#0a1800)">🪖</div><div class="rank-info"><div class="rank-name">Vinland Saga</div><div class="rank-sub">210 Böl · Seinen</div></div><span class="rank-score">9.3</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <span>© 2026 <span class="r">Brütüs Official</span>. Tüm hakları saklıdır.</span>
+  <div style="display:flex;gap:1.5rem;"><a href="#">Gizlilik</a><a href="#">Kullanım</a><a href="#">DMCA</a><a href="#">İletişim</a></div>
+</footer>
+
+<!-- ═══ LOGIN MODAL ═══ -->
+<div class="modal-overlay" id="loginModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('loginModal')">✕</button>
+    <div class="modal-title">Giriş <span>Yap</span></div>
+    <div class="form-group">
+      <label class="form-label">Kullanıcı Adı</label>
+      <input class="form-input" id="loginUser" type="text" placeholder="kullanıcı adınız" autocomplete="off" />
+    </div>
+    <div class="form-group">
+      <label class="form-label">Şifre</label>
+      <input class="form-input" id="loginPass" type="password" placeholder="••••••••" />
+    </div>
+    <div class="form-error" id="loginError">Kullanıcı adı veya şifre hatalı!</div>
+    <button class="form-submit" onclick="doLogin()">Giriş Yap</button>
+    <div class="form-switch">Hesabın yok mu? <a onclick="switchModal('loginModal','registerModal')">Kayıt Ol</a></div>
+  </div>
+</div>
+
+<!-- ═══ REGISTER MODAL ═══ -->
+<div class="modal-overlay" id="registerModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('registerModal')">✕</button>
+    <div class="modal-title">Kayıt <span>Ol</span></div>
+    <div class="form-group">
+      <label class="form-label">Kullanıcı Adı</label>
+      <input class="form-input" id="regUser" type="text" placeholder="kullanıcı adı seç" autocomplete="off" />
+    </div>
+    <div class="form-group">
+      <label class="form-label">E-posta</label>
+      <input class="form-input" id="regEmail" type="email" placeholder="mail@ornek.com" />
+    </div>
+    <div class="form-group">
+      <label class="form-label">Şifre</label>
+      <input class="form-input" id="regPass" type="password" placeholder="min. 6 karakter" />
+    </div>
+    <div class="form-group">
+      <label class="form-label">Şifre Tekrar</label>
+      <input class="form-input" id="regPass2" type="password" placeholder="şifreyi tekrar gir" />
+    </div>
+    <div class="form-error" id="regError">Hata</div>
+    <button class="form-submit" onclick="doRegister()">Kayıt Ol</button>
+    <div class="form-switch">Zaten hesabın var mı? <a onclick="switchModal('registerModal','loginModal')">Giriş Yap</a></div>
+  </div>
+</div>
+
+<!-- ═══ ADMIN PANEL ═══ -->
+<div id="adminPanel">
+  <div class="admin-nav">
+    <div class="admin-logo">⚔ BRÜTÜS <span>ADMIN</span></div>
+    <div style="display:flex;gap:0.75rem;align-items:center;">
+      <span style="color:var(--muted);font-size:0.85rem;">👑 Brütüs Offical</span>
+      <button class="btn-sm btn-outline" onclick="closeAdmin()">← Siteye Dön</button>
+      <button class="btn-sm btn-primary" onclick="doLogout()">Çıkış</button>
+    </div>
+  </div>
+  <div class="admin-body">
+    <div class="admin-header">
+      <h1>Admin <span>Paneli</span></h1>
+      <div style="font-size:0.85rem;color:var(--muted);" id="adminTime"></div>
+    </div>
+
+    <!-- Stats -->
+    <div class="admin-stats">
+      <div class="astat"><div class="astat-label">Toplam Üye</div><div class="astat-val blue" id="statUsers">0</div></div>
+      <div class="astat"><div class="astat-label">Toplam Log</div><div class="astat-val gold" id="statLogs">0</div></div>
+      <div class="astat"><div class="astat-label">Başarısız Giriş</div><div class="astat-val red" id="statFails">0</div></div>
+      <div class="astat"><div class="astat-label">Aktif Oturum</div><div class="astat-val green" id="statActive">1</div></div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="admin-tabs">
+      <div class="admin-tab active" onclick="switchTab('logs')">📋 Kayıt Logları</div>
+      <div class="admin-tab" onclick="switchTab('users')">👥 Kullanıcılar</div>
+    </div>
+
+    <!-- LOG TAB -->
+    <div class="tab-content active" id="tab-logs">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;flex-wrap:wrap;gap:0.75rem;">
+        <div class="log-filters">
+          <button class="log-filter active" onclick="filterLogs('all',this)">Tümü</button>
+          <button class="log-filter" onclick="filterLogs('register',this)">Kayıt</button>
+          <button class="log-filter" onclick="filterLogs('login',this)">Giriş</button>
+          <button class="log-filter" onclick="filterLogs('logout',this)">Çıkış</button>
+          <button class="log-filter" onclick="filterLogs('fail',this)">Başarısız</button>
+          <button class="log-filter" onclick="filterLogs('admin',this)">Admin</button>
+        </div>
+        <button class="btn-sm btn-outline" onclick="clearLogs()" style="font-size:0.78rem;">🗑 Logları Temizle</button>
+      </div>
+      <div class="admin-table-wrap">
+        <table class="admin-table">
+          <thead><tr><th>#</th><th>Zaman</th><th>Kullanıcı</th><th>İşlem</th><th>Detay</th><th>IP</th></tr></thead>
+          <tbody id="logsTable"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- USERS TAB -->
+    <div class="tab-content" id="tab-users">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">
+        <input class="admin-search" type="text" placeholder="Kullanıcı ara..." oninput="searchUsers(this.value)" />
+        <span style="font-size:0.82rem;color:var(--muted);" id="userCount"></span>
+      </div>
+      <div class="admin-table-wrap">
+        <table class="admin-table">
+          <thead><tr><th>#</th><th>Kullanıcı Adı</th><th>E-posta</th><th>Rol</th><th>Kayıt Tarihi</th><th>Durum</th><th>İşlem</th></tr></thead>
+          <tbody id="usersTable"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ═══════════════════════════════════════════════
+// DATA STORE
+// ═══════════════════════════════════════════════
+const ADMIN = { username: 'Brütüs Offical', password: 'Brutus@2026!', role: 'admin', email: 'admin@brutusofficial.com', registered: '2026-01-01 00:00:00', banned: false };
+
+let users = [ADMIN];
+let logs = [];
+let currentUser = null;
+let logFilter = 'all';
+
+// ═══════════════════════════════════════════════
+// LOG SYSTEM
+// ═══════════════════════════════════════════════
+function addLog(type, username, detail) {
+  const fakeIPs = ['185.212.xx.xx','78.183.xx.xx','88.249.xx.xx','212.252.xx.xx','176.41.xx.xx'];
+  logs.unshift({
+    id: logs.length + 1,
+    time: new Date().toLocaleString('tr-TR'),
+    username,
+    type,
+    detail,
+    ip: fakeIPs[Math.floor(Math.random() * fakeIPs.length)]
+  });
+  updateAdminStats();
+}
+
+// ═══════════════════════════════════════════════
+// AUTH
+// ═══════════════════════════════════════════════
+function doLogin() {
+  const u = document.getElementById('loginUser').value.trim();
+  const p = document.getElementById('loginPass').value;
+  const err = document.getElementById('loginError');
+  err.classList.remove('show');
+
+  if (!u || !p) { err.textContent = 'Kullanıcı adı ve şifre boş olamaz!'; err.classList.add('show'); return; }
+
+  const found = users.find(x => x.username === u && x.password === p);
+  if (!found) {
+    addLog('fail', u || 'Bilinmiyor', 'Hatalı giriş denemesi');
+    err.textContent = 'Kullanıcı adı veya şifre hatalı!';
+    err.classList.add('show');
+    return;
+  }
+  if (found.banned) {
+    addLog('fail', u, 'Banlı hesapla giriş denemesi');
+    err.textContent = 'Bu hesap yasaklanmış!';
+    err.classList.add('show');
+    return;
+  }
+
+  currentUser = found;
+  addLog(found.role === 'admin' ? 'admin' : 'login', found.username, found.role === 'admin' ? 'Admin girişi yapıldı' : 'Başarılı giriş');
+  closeModal('loginModal');
+  updateNavbar();
+  showToast(`Hoş geldin, ${found.username}! 👋`, 'success');
+  if (found.role === 'admin') { setTimeout(openAdmin, 600); }
+}
+
+function doRegister() {
+  const u = document.getElementById('regUser').value.trim();
+  const e = document.getElementById('regEmail').value.trim();
+  const p = document.getElementById('regPass').value;
+  const p2 = document.getElementById('regPass2').value;
+  const err = document.getElementById('regError');
+  err.classList.remove('show');
+
+  if (!u || !e || !p || !p2) { err.textContent = 'Tüm alanları doldurun!'; err.classList.add('show'); return; }
+  if (u.length < 3) { err.textContent = 'Kullanıcı adı en az 3 karakter olmalı!'; err.classList.add('show'); return; }
+  if (p.length < 6) { err.textContent = 'Şifre en az 6 karakter olmalı!'; err.classList.add('show'); return; }
+  if (p !== p2) { err.textContent = 'Şifreler eşleşmiyor!'; err.classList.add('show'); return; }
+  if (users.find(x => x.username.toLowerCase() === u.toLowerCase())) { err.textContent = 'Bu kullanıcı adı zaten alınmış!'; err.classList.add('show'); return; }
+  if (users.find(x => x.email && x.email.toLowerCase() === e.toLowerCase())) { err.textContent = 'Bu e-posta adresi zaten kayıtlı!'; err.classList.add('show'); return; }
+
+  const newUser = { username: u, email: e, password: p, role: 'user', registered: new Date().toLocaleString('tr-TR'), banned: false };
+  users.push(newUser);
+  addLog('register', u, `Yeni üye kaydı — ${e}`);
+  closeModal('registerModal');
+  showToast(`Kayıt başarılı! Hoş geldin, ${u} 🎉`, 'success');
+  // auto login
+  currentUser = newUser;
+  updateNavbar();
+}
+
+function doLogout() {
+  if (!currentUser) return;
+  addLog('logout', currentUser.username, 'Oturumu kapattı');
+  showToast(`Güle güle, ${currentUser.username}!`, 'info');
+  currentUser = null;
+  closeAdmin();
+  updateNavbar();
+}
+
+// ═══════════════════════════════════════════════
+// NAVBAR STATE
+// ═══════════════════════════════════════════════
+function updateNavbar() {
+  const nr = document.getElementById('navRight');
+  if (currentUser) {
+    nr.innerHTML = `
+      <div id="userBadge" style="display:flex;align-items:center;gap:0.6rem;">
+        <div style="width:30px;height:30px;border-radius:50%;background:${currentUser.role==='admin'?'var(--gold)':'var(--accent)'};display:flex;align-items:center;justify-content:center;font-size:0.75rem;font-weight:700;color:${currentUser.role==='admin'?'#000':'#fff'};">${currentUser.username[0].toUpperCase()}</div>
+        <span style="font-weight:700;font-size:0.9rem;">${currentUser.username}</span>
+        ${currentUser.role==='admin'?'<span style="color:var(--gold);font-size:0.85rem;">👑</span>':''}
+      </div>
+      ${currentUser.role==='admin'?'<button class="btn-sm btn-admin" onclick="openAdmin()">Admin Panel</button>':''}
+      <button class="btn-sm btn-outline" onclick="doLogout()">Çıkış</button>
+    `;
+  } else {
+    nr.innerHTML = `
+      <button class="btn-sm btn-outline" onclick="openModal('loginModal')">Giriş Yap</button>
+      <button class="btn-sm btn-primary" onclick="openModal('registerModal')">Kayıt Ol</button>
+    `;
+  }
+}
+
+// ═══════════════════════════════════════════════
+// MODAL
+// ═══════════════════════════════════════════════
+function openModal(id) {
+  document.getElementById(id).classList.add('open');
+  document.getElementById('loginError')?.classList.remove('show');
+  document.getElementById('regError')?.classList.remove('show');
+}
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+function switchModal(from, to) { closeModal(from); openModal(to); }
+document.querySelectorAll('.modal-overlay').forEach(m => {
+  m.addEventListener('click', e => { if (e.target === m) m.classList.remove('open'); });
+});
+
+// ═══════════════════════════════════════════════
+// ADMIN PANEL
+// ═══════════════════════════════════════════════
+function openAdmin() {
+  if (!currentUser || currentUser.role !== 'admin') return;
+  addLog('admin', currentUser.username, 'Admin paneli açıldı');
+  document.getElementById('adminPanel').style.display = 'block';
+  updateAdminStats();
+  renderLogs();
+  renderUsers();
+  updateAdminTime();
+}
+function closeAdmin() { document.getElementById('adminPanel').style.display = 'none'; }
+
+function updateAdminStats() {
+  document.getElementById('statUsers').textContent = users.length;
+  document.getElementById('statLogs').textContent = logs.length;
+  document.getElementById('statFails').textContent = logs.filter(l => l.type === 'fail').length;
+  document.getElementById('statActive').textContent = currentUser ? 1 : 0;
+}
+
+function updateAdminTime() {
+  const el = document.getElementById('adminTime');
+  if (el) { el.textContent = new Date().toLocaleString('tr-TR'); setTimeout(updateAdminTime, 1000); }
+}
+
+// TABS
+function switchTab(name) {
+  document.querySelectorAll('.admin-tab').forEach((t, i) => t.classList.toggle('active', ['logs','users'][i] === name));
+  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+  if (name === 'logs') renderLogs();
+  if (name === 'users') renderUsers();
+}
+
+// LOGS RENDER
+function renderLogs() {
+  const tbody = document.getElementById('logsTable');
+  const filtered = logFilter === 'all' ? logs : logs.filter(l => l.type === logFilter);
+  if (filtered.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:2rem;">Henüz log yok</td></tr>';
+    return;
+  }
+  tbody.innerHTML = filtered.map((l, i) => `
+    <tr>
+      <td style="color:var(--muted);font-size:0.8rem;">${filtered.length - i}</td>
+      <td style="color:var(--muted);font-size:0.82rem;white-space:nowrap;">${l.time}</td>
+      <td style="font-weight:700;">${l.username}</td>
+      <td><span class="log-type log-${l.type}">${logTypeLabel(l.type)}</span></td>
+      <td style="color:var(--muted);font-size:0.85rem;">${l.detail}</td>
+      <td style="color:var(--muted);font-size:0.8rem;font-family:monospace;">${l.ip}</td>
+    </tr>
+  `).join('');
+}
+
+function logTypeLabel(t) {
+  return { register:'Kayıt', login:'Giriş', logout:'Çıkış', fail:'Başarısız', admin:'Admin' }[t] || t;
+}
+
+function filterLogs(type, btn) {
+  logFilter = type;
+  document.querySelectorAll('.log-filter').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderLogs();
+}
+
+function clearLogs() {
+  if (!confirm('Tüm loglar silinsin mi?')) return;
+  logs = [];
+  addLog('admin', currentUser.username, 'Tüm loglar silindi');
+  renderLogs();
+  updateAdminStats();
+  showToast('Loglar temizlendi', 'info');
+}
+
+// USERS RENDER
+function renderUsers(filter = '') {
+  const tbody = document.getElementById('usersTable');
+  const list = users.filter(u => !filter || u.username.toLowerCase().includes(filter.toLowerCase()) || (u.email||'').toLowerCase().includes(filter.toLowerCase()));
+  document.getElementById('userCount').textContent = `${list.length} kullanıcı`;
+  tbody.innerHTML = list.map((u, i) => `
+    <tr>
+      <td style="color:var(--muted);font-size:0.8rem;">${i+1}</td>
+      <td style="font-weight:700;">${u.username} ${u.role==='admin'?'👑':''}</td>
+      <td style="color:var(--muted);font-size:0.85rem;">${u.email||'—'}</td>
+      <td><span class="user-role role-${u.role}">${u.role === 'admin' ? 'Admin' : 'Üye'}</span></td>
+      <td style="color:var(--muted);font-size:0.82rem;">${u.registered}</td>
+      <td><span class="online-dot ${u.banned?'dot-gray':'dot-green'}"></span>${u.banned?'Banlı':'Aktif'}</td>
+      <td>${u.role !== 'admin' ? `<button class="admin-action-btn ${u.banned?'btn-unban':'btn-ban'}" onclick="toggleBan('${u.username}')">${u.banned?'Banlı Kaldır':'Banla'}</button>` : '<span style="color:var(--muted);font-size:0.8rem;">Korumalı</span>'}</td>
+    </tr>
+  `).join('');
+}
+
+function searchUsers(val) { renderUsers(val); }
+
+function toggleBan(username) {
+  const u = users.find(x => x.username === username);
+  if (!u || u.role === 'admin') return;
+  u.banned = !u.banned;
+  addLog('admin', currentUser.username, `${username} ${u.banned?'banlandı':'banı kaldırıldı'}`);
+  renderUsers();
+  renderLogs();
+  showToast(`${username} ${u.banned?'banlandı 🚫':'ban kaldırıldı ✅'}`, u.banned?'error':'success');
+}
+
+// ═══════════════════════════════════════════════
+// TOAST
+// ═══════════════════════════════════════════════
+let toastTimer;
+function showToast(msg, type='info') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = `toast ${type} show`;
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 3500);
+}
+
+// ═══════════════════════════════════════════════
+// CATEGORY FILTER
+// ═══════════════════════════════════════════════
+document.querySelectorAll('.cat-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+  });
+});
+
+// ═══════════════════════════════════════════════
+// INIT — seed a couple of demo logs
+// ═══════════════════════════════════════════════
+addLog('admin', 'Brütüs Offical', 'Sistem başlatıldı');
+addLog('login', 'Brütüs Offical', 'Otomatik sistem girişi');
+</script>
+</body>
+</html>
